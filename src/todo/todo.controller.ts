@@ -23,17 +23,17 @@ export class TodoController {
 
   @Get()
   findAll(@Query() query: any) {
-    return this.todoService.getTodos();
+    return this.todoService.find(query || {});
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.todoService.getTodo(id);
+    return this.todoService.findOne({ id });
   }
 
   @Put(':id')
   update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto) {
-    return this.todoService.updateTodo(id, updateTodoDto);
+    return this.todoService.findOneAndUpdate({ id }, updateTodoDto);
   }
 
   @Delete(':id')

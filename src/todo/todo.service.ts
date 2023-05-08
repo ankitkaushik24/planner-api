@@ -1,37 +1,49 @@
-import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { FilterQuery, Model } from 'mongoose';
+import { Todo, TodoDocument } from 'src/schemas/todo.schema';
+import { CreateTodoDto } from './create-todo.dto';
 
 @Injectable()
 export class TodoService {
   private readonly todos = [];
 
-  getTodos() {
-    return this.todos;
+  constructor(@InjectModel(Todo.name) private todoModel: Model<TodoDocument>) {}
+
+  async findOne(todoFilterQuery: FilterQuery<Todo>): Promise<Todo> {
+    return this.todoModel.findOne(todoFilterQuery);
   }
 
-  getTodo(id: string) {
-    return this.todos.find((todo) => todo.id === id);
+  async find(todosFilterQuery: FilterQuery<Todo>): Promise<Todo[]> {
+    return this.todoModel.find(todosFilterQuery);
   }
 
-  createTodo(todo) {
-    this.todos.push({ id: uuidv4(), complete: false, ...todo });
-    return todo;
+  async create(todo: Todo): Promise<Todo> {
+    const newUser = new this.todoModel(todo);
+    return newUser.save();
   }
 
-  updateTodo(id: string, update: any) {
-    const todoIdx = this.findTodoIndex(id);
-    if (todoIdx !== -1) {
-      this.todos[todoIdx] = { ...this.todos[todoIdx], ...update };
+  async findOneAndUpdate(
+    todoFilterQuery: FilterQuery<Todo>,
+    todo: Partial<Todo>,
+  ): Promise<Todo> {
+    return this.todoModel.findOneAndUpdate(todoFilterQuery, todo, {
+      new: true,
+    });
+  }
+
+  async createTodo(createCatDto: CreateTodoDto): Promise<Todo> {
+    const createdTodo = new this.todoModel(createCatDto);
+    return createdTodo.save();
+  }
+
+  async deleteTodo(id: string) {
+    const res = await this.todoModel.deleteOne({ id });
+
+    if (res.deletedCount === 0) {
+      throw new HttpException('Item does not exist!', HttpStatus.NOT_FOUND);
     }
-    return this.todos[todoIdx];
-  }
 
-  deleteTodo(id: string) {
-    const todoIdx = this.findTodoIndex(id);
-    return this.todos.splice(todoIdx, 1);
-  }
-
-  private findTodoIndex(id: string) {
-    return this.todos.findIndex((todo) => todo.id == id);
+    return res;
   }
 }
