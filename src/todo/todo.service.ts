@@ -37,13 +37,17 @@ export class TodoService {
     return createdTodo.save();
   }
 
-  async deleteTodo(id: string) {
-    const res = await this.todoModel.deleteOne({ id });
+  async deleteTodo(_id: string) {
+    const res = await this.todoModel.deleteOne({ _id });
 
     if (res.deletedCount === 0) {
       throw new HttpException('Item does not exist!', HttpStatus.NOT_FOUND);
     }
 
     return res;
+  }
+
+  deleteAll() {
+    return this.todoModel.deleteMany();
   }
 }

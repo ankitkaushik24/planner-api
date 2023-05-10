@@ -27,17 +27,22 @@ export class TodoController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.todoService.findOne({ id });
+  findOne(@Param('id') _id: string) {
+    return this.todoService.findOne({ _id });
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() updateTodoDto: UpdateTodoDto) {
-    return this.todoService.findOneAndUpdate({ id }, updateTodoDto);
+  update(@Param('id') _id: string, @Body() updateTodoDto: UpdateTodoDto) {
+    return this.todoService.findOneAndUpdate({ _id }, updateTodoDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.todoService.deleteTodo(id);
+  remove(@Param('id') _id: string) {
+    return this.todoService.deleteTodo(_id);
+  }
+
+  @Delete()
+  removeAll() {
+    return this.todoService.deleteAll();
   }
 }
